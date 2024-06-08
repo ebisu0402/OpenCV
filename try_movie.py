@@ -1,7 +1,23 @@
 import cv2
 
+data = cv2.VideoCapture("./sample.mp4")
+type(data)
+data.isOpened()
 
-def play_video(video_path):
+
+def detect_cat_faces(frame, cat_cascade):
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    cats = cat_cascade.detectMultiScale(
+        gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30)
+    )
+
+    for x, y, w, h in cats:
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+    return frame
+
+
+def play_video_with_cat_detection(video_path, cascade_path):
+    cat_cascade = cv2.CascadeClassifier(cascade_path)
     cap = cv2.VideoCapture(video_path)
 
     if not cap.isOpened():
@@ -12,7 +28,8 @@ def play_video(video_path):
         ret, frame = cap.read()
 
         if ret:
-            cv2.imshow("sample data", frame)
+            frame_with_cat_faces = detect_cat_faces(frame, cat_cascade)
+            cv2.imshow("Cat Face Detection", frame_with_cat_faces)
 
             key = cv2.waitKey(1)
 
@@ -27,4 +44,5 @@ def play_video(video_path):
 
 if __name__ == "__main__":
     video_path = "./sample.mp4"
-    play_video(video_path)
+    cascade_path = "./cascade.xml"
+    play_video_with_cat_detection(video_path, cascade_path)
